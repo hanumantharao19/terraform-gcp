@@ -10,13 +10,20 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Detect Terraform Directories
         id: set-matrix
         run: |
-          folders=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F/ '/.tf$/ {print $1}' | sort -u | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          folders=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F/ '/\.tf$/ {print $1}' | sort -u)
+          if [ -z "$folders" ]; then
+            echo "✅ No changes detected. Using fallback folders."
+            folders='["vm", "vpc_module"]'  # ← Replace with your actual folder names
+          else
+            folders=$(echo "$folders" | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          fi
+          echo "matrix=$folders"
           echo "matrix=$folders" >> $GITHUB_OUTPUT
 
   terraform:
@@ -27,7 +34,7 @@ jobs:
         folder: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Setup Terraform
@@ -46,4 +53,3 @@ jobs:
         run: terraform apply -auto-approve tfplan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.TERRAFORM_GCP_SA_KEY }}
-
