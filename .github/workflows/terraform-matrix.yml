@@ -43,10 +43,14 @@ jobs:
       - name: Terraform Init
         working-directory: ${{ matrix.folder }}
         run: terraform init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.TERRAFORM_GCP_SA_KEY }}
 
       - name: Terraform Plan
         working-directory: ${{ matrix.folder }}
         run: terraform plan -out=tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.TERRAFORM_GCP_SA_KEY }}
 
       - name: Terraform Apply
         working-directory: ${{ matrix.folder }}
