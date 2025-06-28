@@ -45,5 +45,5 @@ jobs:
         working-directory: ${{ matrix.folder }}
         run: terraform apply -auto-approve tfplan
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GOOGLE_CREDENTIALS: ${{ secrets.TERRAFORM_GCP_SA_KEY }}
 
