@@ -1,0 +1,49 @@
+name: Terraform Multi-Folder CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Detect Terraform Directories
+        id: set-matrix
+        run: |
+          folders=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F/ '/.tf$/ {print $1}' | sort -u | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "matrix=$folders" >> $GITHUB_OUTPUT
+
+  terraform:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ matrix.folder }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ matrix.folder }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ matrix.folder }}
+        run: terraform apply -auto-approve tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+
