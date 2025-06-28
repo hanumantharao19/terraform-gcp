@@ -22,7 +22,7 @@ jobs:
           folders=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F/ '/\.tf$/ {print $1}' | sort -u)
           if [ -z "$folders" ]; then
             echo "✅ No changes detected. Using fallback folders."
-            folders='["vm", "vpc_module"]'  # ← Replace with your actual folder names
+            folders='["vm"]'  # ← Replace with your actual folder names
           else
             folders=$(echo "$folders" | jq -R -s -c 'split("\n") | map(select(. != ""))')
           fi
