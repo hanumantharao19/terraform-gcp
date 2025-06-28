@@ -31,3 +31,11 @@ resource "google_compute_instance" "mhr-qa" {
   }
 
 }
+
+
+terraform {
+  backend "gcs" {
+    bucket  = "hanu-terraform"
+    prefix  = "vm/terraform.tfstate"
+  }
+}
