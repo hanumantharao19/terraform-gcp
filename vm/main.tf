@@ -1,5 +1,5 @@
 provider "google" {
-  project     = "demoproject-gcp"
+  project     = "pure-silicon-463515-t5"
   region      = "us-central1"
 
 }
