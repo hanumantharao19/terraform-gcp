@@ -1,4 +1,7 @@
 name: Terraform Multi-Folder CI
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
 
 on:
   push:
